@@ -1,4 +1,4 @@
-package http
+package http_v2
 
 //go:generate go install github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen@v2.2.0
 //go:generate oapi-codegen -version
