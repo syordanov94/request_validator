@@ -1,0 +1,54 @@
+openapi: 2.0.0
+info:
+  title: Sample API
+  description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.
+  version: 0.1.9
+
+servers:
+  - url: http://api.example.com/v1
+    description: Optional server description, e.g. Main (production) server
+  - url: http://staging-api.example.com
+    description: Optional server description, e.g. Internal staging server for testing
+
+paths:
+  /users/create:
+    post:
+      summary: Creates a new user.
+      description: Optional extended description in CommonMark or HTML.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserReq'
+      responses:
+        '200':    # status code
+          description: No response is needed just the 200 status code
+
+components:
+  schemas:
+    CreateUserReq:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 32d3e8f1-2f81-49c0-acb6-6dccd84f3dab
+          description: The user's unique identifier in UUID format
+        firstName:
+          type: string
+          example: Bruce
+          description: The user's first name
+        lastName:
+          type: string
+          example: Wayne
+          description: The user's last names
+        email:
+          type: string
+          format: email
+          example: batman@gotham.com
+      required:  
+        - id
+        - firstName
+        - lastName
+
+
