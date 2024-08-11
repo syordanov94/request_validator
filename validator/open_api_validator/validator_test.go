@@ -76,8 +76,8 @@ func TestValidator(t *testing.T) {
 			{
 				"id": "32d3e8f1-2f81-49c0-acb6-6dccd84f3dab",
 				"firstName": "Jon",
-				"lastName": "Snow"
-				"email: this_is_a_test
+				"lastName": "Snow",
+				"email": this_is_a_test
 			}
 			`,
 			url:      "http://api.example.com/v1/users/create",
@@ -89,8 +89,8 @@ func TestValidator(t *testing.T) {
 			{
 				"id": "32d3e8f1-2f81-49c0-acb6-6dccd84f3dab",
 				"firstName": "Jon",
-				"lastName": "Snow"
-				"email: jon_snow@winterfell.com
+				"lastName": "Snow",
+				"email": "jon_snow@winterfell.com"
 			}
 			`,
 			url:      "http://api.example.com/v1/users/create",
