@@ -51,7 +51,7 @@ components:
           type: string
           example: batman@gotham.com
           x-oapi-codegen-extra-tags:
-            validate: email
+            validate: omitempty,email 
       required:  
         - id
         - firstName
