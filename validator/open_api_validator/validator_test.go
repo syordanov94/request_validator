@@ -144,7 +144,7 @@ func BenchmarkValidator(b *testing.B) {
 		validator := MustCreateValidator(ctx, swaggerDoc)
 
 		for i := 0; i < b.N; i++ {
-			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(correctRequest)))
+			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "http://api.example.com/v1/users/create", bytes.NewReader([]byte(correctRequest)))
 			httpRequest.Header.Add("Content-Type", "application/json")
 
 			validator.ValidateRequest(ctx, httpRequest)
@@ -161,7 +161,7 @@ func BenchmarkValidator(b *testing.B) {
 		validator := MustCreateValidator(ctx, swaggerDoc)
 
 		for i := 0; i < b.N; i++ {
-			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(invalidFormatFieldRequest)))
+			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "http://api.example.com/v1/users/create", bytes.NewReader([]byte(invalidFormatFieldRequest)))
 			httpRequest.Header.Add("Content-Type", "application/json")
 
 			validator.ValidateRequest(ctx, httpRequest)
@@ -178,7 +178,7 @@ func BenchmarkValidator(b *testing.B) {
 		validator := MustCreateValidator(ctx, swaggerDoc)
 
 		for i := 0; i < b.N; i++ {
-			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(missingMandatoryFieldRequest)))
+			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "http://api.example.com/v1/users/create", bytes.NewReader([]byte(missingMandatoryFieldRequest)))
 			httpRequest.Header.Add("Content-Type", "application/json")
 
 			validator.ValidateRequest(ctx, httpRequest)
