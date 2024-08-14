@@ -3,12 +3,37 @@ package openapivalidator
 import (
 	"bytes"
 	"context"
+	"errors"
 	"net/http"
 	api "request_validator/http/v1"
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/openapi3filter"
+	"github.com/getkin/kin-openapi/routers"
 	"github.com/stretchr/testify/require"
 )
+
+const correctRequest = `
+{
+	"id": "32d3e8f1-2f81-49c0-acb6-6dccd84f3dab",
+	"firstName": "Jon",
+	"lastName": "Snow"
+}`
+
+const missingMandatoryFieldRequest = `
+{
+	"firstName": "Jon",
+	"lastName": "Snow"
+}
+`
+
+const invalidFormatFieldRequest = `
+{
+	"id": "sadwefsds",
+	"firstName": "Jon",
+	"lastName": "Snow"
+}`
 
 func TestValidator(t *testing.T) {
 	// create the validator
@@ -25,47 +50,36 @@ func TestValidator(t *testing.T) {
 	}{
 		{
 			name: "given a request that whose ID is not of a UUID type, when we try to validate it, an error should be returned",
-			req: `
-			{
-				"id": "sadwefsds",
-				"firstName": "Jon",
-				"lastName": "Snow"
-			}
-			`,
-			url:      "http://api.example.com/v1/users/create",
-			wantFunc: func(t *testing.T, err error) { require.Error(t, err, "validator should error") },
+			req:  invalidFormatFieldRequest,
+			url:  "http://api.example.com/v1/users/create",
+			wantFunc: func(t *testing.T, err error) {
+				require.Error(t, err, "validator should error")
+				var schemaErr *openapi3.SchemaError
+				require.True(t, errors.As(err, &schemaErr), "error should be of type SchemaError")
+			},
 		},
 		{
 			name: "given a valid request that does not come from one of the specified url server, when we try to validate it, an error should be returned",
-			req: `
-			{
-				"id": "32d3e8f1-2f81-49c0-acb6-6dccd84f3dab",
-				"firstName": "Jon",
-				"lastName": "Snow"
-			}
-			`,
-			url:      "XXXXXXXXXXX",
-			wantFunc: func(t *testing.T, err error) { require.Error(t, err, "validator should error") },
+			req:  correctRequest,
+			url:  "XXXXXXXXXXX",
+			wantFunc: func(t *testing.T, err error) {
+				require.Error(t, err, "validator should error")
+				require.True(t, errors.Is(err, routers.ErrPathNotFound), "error should be of type ErrPathNotFound")
+			},
 		},
 		{
 			name: "given a request that does not have a required field specified, when we try to validate it, an error should be returned",
-			req: `
-			{
-				"firstName": "Jon",
-				"lastName": "Snow"
-			}
-			`,
-			url:      "http://api.example.com/v1/users/create",
-			wantFunc: func(t *testing.T, err error) { require.Error(t, err, "validator should error") },
+			req:  missingMandatoryFieldRequest,
+			url:  "http://api.example.com/v1/users/create",
+			wantFunc: func(t *testing.T, err error) {
+				var schemaErr *openapi3.SchemaError
+				require.True(t, errors.As(err, &schemaErr), "error should be of type SchemaError")
+				require.Error(t, err, "validator should error")
+			},
 		},
 		{
-			name: "given a valid request from a registered server url, when we try to validate it, no error should be returned",
-			req: `
-			{
-				"id": "32d3e8f1-2f81-49c0-acb6-6dccd84f3dab",
-				"firstName": "Jon",
-				"lastName": "Snow"
-			}`,
+			name:     "given a valid request from a registered server url, when we try to validate it, no error should be returned",
+			req:      correctRequest,
 			url:      "http://api.example.com/v1/users/create",
 			wantFunc: func(t *testing.T, err error) { require.NoError(t, err, "validator should not error") },
 		},
@@ -79,8 +93,14 @@ func TestValidator(t *testing.T) {
 				"email: "this_is_a_test"
 			}
 			`,
-			url:      "http://api.example.com/v1/users/create",
-			wantFunc: func(t *testing.T, err error) { require.Error(t, err, "validator should error") },
+			url: "http://api.example.com/v1/users/create",
+			wantFunc: func(t *testing.T, err error) {
+				// Since the additional validation of the email field is not done by the openapi3 library, the error will be of type ParseError because it can't parse
+				// the request email field to the specific format we have defined in the validator
+				var parseErr *openapi3filter.ParseError
+				require.True(t, errors.As(err, &parseErr), "error should be of type ParseError")
+				require.Error(t, err, "validator should error")
+			},
 		},
 		{
 			name: "given a valid request from a registered server url, when we try to validate it, no error should be returned",
