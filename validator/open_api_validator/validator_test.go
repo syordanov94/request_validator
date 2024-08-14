@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"net/http"
-	api "request_validator/http"
+	api "request_validator/http/v1"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -65,8 +65,7 @@ func TestValidator(t *testing.T) {
 				"id": "32d3e8f1-2f81-49c0-acb6-6dccd84f3dab",
 				"firstName": "Jon",
 				"lastName": "Snow"
-			}
-			`,
+			}`,
 			url:      "http://api.example.com/v1/users/create",
 			wantFunc: func(t *testing.T, err error) { require.NoError(t, err, "validator should not error") },
 		},
@@ -77,7 +76,7 @@ func TestValidator(t *testing.T) {
 				"id": "32d3e8f1-2f81-49c0-acb6-6dccd84f3dab",
 				"firstName": "Jon",
 				"lastName": "Snow",
-				"email": this_is_a_test
+				"email: "this_is_a_test"
 			}
 			`,
 			url:      "http://api.example.com/v1/users/create",

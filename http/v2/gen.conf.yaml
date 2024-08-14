@@ -1,5 +1,5 @@
 output: http_api.gen.go
-package: http
+package: http_v2
 generate:
     models: true
     embedded-spec: true
