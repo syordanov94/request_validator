@@ -111,7 +111,7 @@ func TestValidator(t *testing.T) {
 }
 
 func BenchmarkValidator(b *testing.B) {
-	b.Run("benchmark with correct request", func(b *testing.B) {
+	b.Run("Go validator benchmark with correct request", func(b *testing.B) {
 		// arrange
 		ctx := context.Background()
 
@@ -126,7 +126,7 @@ func BenchmarkValidator(b *testing.B) {
 		}
 	})
 
-	b.Run("benchmark with invalid format request", func(b *testing.B) {
+	b.Run("Go validator benchmark with invalid format request", func(b *testing.B) {
 		// arrange
 		ctx := context.Background()
 
@@ -141,7 +141,7 @@ func BenchmarkValidator(b *testing.B) {
 		}
 	})
 
-	b.Run("benchmark with missing field request", func(b *testing.B) {
+	b.Run("Go validator benchmark with missing field request", func(b *testing.B) {
 		// arrange
 		ctx := context.Background()
 
