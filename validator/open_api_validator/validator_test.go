@@ -132,3 +132,56 @@ func TestValidator(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkValidator(b *testing.B) {
+	b.Run("benchmark with correct request", func(b *testing.B) {
+		// arrange
+		ctx := context.Background()
+
+		// create the validator
+		swaggerDoc, err := api.GetSwagger()
+		require.NoError(b, err, "swagger recovery should not error")
+		validator := MustCreateValidator(ctx, swaggerDoc)
+
+		for i := 0; i < b.N; i++ {
+			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(correctRequest)))
+			httpRequest.Header.Add("Content-Type", "application/json")
+
+			validator.ValidateRequest(ctx, httpRequest)
+		}
+	})
+
+	b.Run("benchmark with invalid format request", func(b *testing.B) {
+		// arrange
+		ctx := context.Background()
+
+		// create the validator
+		swaggerDoc, err := api.GetSwagger()
+		require.NoError(b, err, "swagger recovery should not error")
+		validator := MustCreateValidator(ctx, swaggerDoc)
+
+		for i := 0; i < b.N; i++ {
+			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(invalidFormatFieldRequest)))
+			httpRequest.Header.Add("Content-Type", "application/json")
+
+			validator.ValidateRequest(ctx, httpRequest)
+		}
+	})
+
+	b.Run("benchmark with missing field request", func(b *testing.B) {
+		// arrange
+		ctx := context.Background()
+
+		// create the validator
+		swaggerDoc, err := api.GetSwagger()
+		require.NoError(b, err, "swagger recovery should not error")
+		validator := MustCreateValidator(ctx, swaggerDoc)
+
+		for i := 0; i < b.N; i++ {
+			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(missingMandatoryFieldRequest)))
+			httpRequest.Header.Add("Content-Type", "application/json")
+
+			validator.ValidateRequest(ctx, httpRequest)
+		}
+	})
+}
