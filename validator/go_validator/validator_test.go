@@ -3,9 +3,11 @@ package govalidator
 import (
 	"bytes"
 	"context"
+	"errors"
 	"net/http"
 	"testing"
 
+	"github.com/go-playground/validator"
 	"github.com/stretchr/testify/require"
 )
 
@@ -42,14 +44,22 @@ func TestValidator(t *testing.T) {
 		wantFunc func(t *testing.T, err error)
 	}{
 		{
-			name:     "given a request that whose ID is not of a UUID type, when we try to validate it, an error should be returned",
-			req:      invalidFormatFieldRequest,
-			wantFunc: func(t *testing.T, err error) { require.Error(t, err, "validator should error") },
+			name: "given a request that whose ID is not of a UUID type, when we try to validate it, an error should be returned",
+			req:  invalidFormatFieldRequest,
+			wantFunc: func(t *testing.T, err error) {
+				require.Error(t, err, "validator should error")
+				var validationErrors validator.ValidationErrors
+				require.True(t, errors.As(err, &validationErrors), "error should be of type validator.ValidationErrors")
+			},
 		},
 		{
-			name:     "given a request that does not have a required field specified, when we try to validate it, an error should be returned",
-			req:      missingMandatoryFieldRequest,
-			wantFunc: func(t *testing.T, err error) { require.Error(t, err, "validator should error") },
+			name: "given a request that does not have a required field specified, when we try to validate it, an error should be returned",
+			req:  missingMandatoryFieldRequest,
+			wantFunc: func(t *testing.T, err error) {
+				require.Error(t, err, "validator should error")
+				var validationErrors validator.ValidationErrors
+				require.True(t, errors.As(err, &validationErrors), "error should be of type validator.ValidationErrors")
+			},
 		},
 		{
 			name:     "given a valid request, when we try to validate it, no error should be returned",
@@ -65,7 +75,11 @@ func TestValidator(t *testing.T) {
 				"lastName": "Snow",
 				"email": "this_is_a_test"
 			}`,
-			wantFunc: func(t *testing.T, err error) { require.Error(t, err, "validator should error") },
+			wantFunc: func(t *testing.T, err error) {
+				require.Error(t, err, "validator should error")
+				var validationErrors validator.ValidationErrors
+				require.True(t, errors.As(err, &validationErrors), "error should be of type validator.ValidationErrors")
+			},
 		},
 		{
 			name: "given a valid request with a valid email format, when we try to validate it, no error should be returned",
@@ -105,9 +119,8 @@ func BenchmarkValidator(b *testing.B) {
 		reqValidator := NewValidator()
 
 		for i := 0; i < b.N; i++ {
-			httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(correctRequest)))
+			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(correctRequest)))
 			httpRequest.Header.Add("Content-Type", "application/json")
-			require.NoError(b, err, "http request creation should not error")
 
 			reqValidator.ValidateRequest(ctx, httpRequest)
 		}
@@ -121,9 +134,9 @@ func BenchmarkValidator(b *testing.B) {
 		reqValidator := NewValidator()
 
 		for i := 0; i < b.N; i++ {
-			httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(invalidFormatFieldRequest)))
+			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(invalidFormatFieldRequest)))
 			httpRequest.Header.Add("Content-Type", "application/json")
-			require.NoError(b, err, "http request creation should not error")
+
 			reqValidator.ValidateRequest(ctx, httpRequest)
 		}
 	})
@@ -136,9 +149,9 @@ func BenchmarkValidator(b *testing.B) {
 		reqValidator := NewValidator()
 
 		for i := 0; i < b.N; i++ {
-			httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(missingMandatoryFieldRequest)))
+			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(missingMandatoryFieldRequest)))
 			httpRequest.Header.Add("Content-Type", "application/json")
-			require.NoError(b, err, "http request creation should not error")
+
 			reqValidator.ValidateRequest(ctx, httpRequest)
 		}
 	})
