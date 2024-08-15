@@ -9,6 +9,8 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/stretchr/testify/require"
+
+	api "request_validator/http/v2"
 )
 
 const correctRequest = `
@@ -41,12 +43,12 @@ func TestValidator(t *testing.T) {
 	tests := []struct {
 		name     string
 		req      string
-		wantFunc func(t *testing.T, err error)
+		wantFunc func(t *testing.T, err error, req *api.CreateUserReq)
 	}{
 		{
 			name: "given a request that whose ID is not of a UUID type, when we try to validate it, an error should be returned",
 			req:  invalidFormatFieldRequest,
-			wantFunc: func(t *testing.T, err error) {
+			wantFunc: func(t *testing.T, err error, req *api.CreateUserReq) {
 				require.Error(t, err, "validator should error")
 				var validationErrors validator.ValidationErrors
 				require.True(t, errors.As(err, &validationErrors), "error should be of type validator.ValidationErrors")
@@ -55,16 +57,21 @@ func TestValidator(t *testing.T) {
 		{
 			name: "given a request that does not have a required field specified, when we try to validate it, an error should be returned",
 			req:  missingMandatoryFieldRequest,
-			wantFunc: func(t *testing.T, err error) {
+			wantFunc: func(t *testing.T, err error, req *api.CreateUserReq) {
 				require.Error(t, err, "validator should error")
 				var validationErrors validator.ValidationErrors
 				require.True(t, errors.As(err, &validationErrors), "error should be of type validator.ValidationErrors")
 			},
 		},
 		{
-			name:     "given a valid request, when we try to validate it, no error should be returned",
-			req:      correctRequest,
-			wantFunc: func(t *testing.T, err error) { require.NoError(t, err, "validator should not error") },
+			name: "given a valid request, when we try to validate it, no error should be returned",
+			req:  correctRequest,
+			wantFunc: func(t *testing.T, err error, req *api.CreateUserReq) {
+				require.Equal(t, req.Id, "32d3e8f1-2f81-49c0-acb6-6dccd84f3dab")
+				require.Equal(t, req.FirstName, "Jon")
+				require.Equal(t, req.LastName, "Snow")
+				require.NoError(t, err, "validator should not error")
+			},
 		},
 		{
 			name: "given a request with an invalid email formatted field, when we try to validate it, an error should be returned",
@@ -75,7 +82,7 @@ func TestValidator(t *testing.T) {
 				"lastName": "Snow",
 				"email": "this_is_a_test"
 			}`,
-			wantFunc: func(t *testing.T, err error) {
+			wantFunc: func(t *testing.T, err error, req *api.CreateUserReq) {
 				require.Error(t, err, "validator should error")
 				var validationErrors validator.ValidationErrors
 				require.True(t, errors.As(err, &validationErrors), "error should be of type validator.ValidationErrors")
@@ -90,7 +97,13 @@ func TestValidator(t *testing.T) {
 				"lastName": "Snow",
 				"email": "jon_snow@winterfell.com"
 			}`,
-			wantFunc: func(t *testing.T, err error) { require.NoError(t, err, "validator should not error") },
+			wantFunc: func(t *testing.T, err error, req *api.CreateUserReq) {
+				require.NoError(t, err, "validator should not error")
+				require.Equal(t, req.Id, "32d3e8f1-2f81-49c0-acb6-6dccd84f3dab")
+				require.Equal(t, req.FirstName, "Jon")
+				require.Equal(t, req.LastName, "Snow")
+				require.Equal(t, *req.Email, "jon_snow@winterfell.com")
+			},
 		},
 	}
 
@@ -102,10 +115,11 @@ func TestValidator(t *testing.T) {
 			require.NoError(t, err, "http request creation should not error")
 
 			// act
-			_, err = reqValidator.ValidateRequest(ctx, httpRequest)
+			var req api.CreateUserReq
+			err = reqValidator.ValidateRequest(ctx, httpRequest, &req)
 
 			// assert
-			tt.wantFunc(t, err)
+			tt.wantFunc(t, err, &req)
 		})
 	}
 }
@@ -114,6 +128,7 @@ func BenchmarkValidator(b *testing.B) {
 	b.Run("Go validator benchmark with correct request", func(b *testing.B) {
 		// arrange
 		ctx := context.Background()
+		var req api.CreateUserReq
 
 		// create the validator
 		reqValidator := NewValidator()
@@ -122,13 +137,14 @@ func BenchmarkValidator(b *testing.B) {
 			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(correctRequest)))
 			httpRequest.Header.Add("Content-Type", "application/json")
 
-			reqValidator.ValidateRequest(ctx, httpRequest)
+			reqValidator.ValidateRequest(ctx, httpRequest, &req)
 		}
 	})
 
 	b.Run("Go validator benchmark with invalid format request", func(b *testing.B) {
 		// arrange
 		ctx := context.Background()
+		var req api.CreateUserReq
 
 		// create the validator
 		reqValidator := NewValidator()
@@ -137,13 +153,14 @@ func BenchmarkValidator(b *testing.B) {
 			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(invalidFormatFieldRequest)))
 			httpRequest.Header.Add("Content-Type", "application/json")
 
-			reqValidator.ValidateRequest(ctx, httpRequest)
+			reqValidator.ValidateRequest(ctx, httpRequest, &req)
 		}
 	})
 
 	b.Run("Go validator benchmark with missing field request", func(b *testing.B) {
 		// arrange
 		ctx := context.Background()
+		var req api.CreateUserReq
 
 		// create the validator
 		reqValidator := NewValidator()
@@ -152,7 +169,7 @@ func BenchmarkValidator(b *testing.B) {
 			httpRequest, _ := http.NewRequestWithContext(ctx, http.MethodPost, "", bytes.NewReader([]byte(missingMandatoryFieldRequest)))
 			httpRequest.Header.Add("Content-Type", "application/json")
 
-			reqValidator.ValidateRequest(ctx, httpRequest)
+			reqValidator.ValidateRequest(ctx, httpRequest, &req)
 		}
 	})
 
