@@ -7,8 +7,6 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator"
-
-	api "request_validator/http/v2"
 )
 
 type Validator struct {
@@ -20,14 +18,13 @@ func NewValidator() Validator {
 	return ret
 }
 
-func (v *Validator) ValidateRequest(ctx context.Context, r *http.Request) (*api.CreateUserReq, error) {
+func (v *Validator) ValidateRequest(ctx context.Context, r *http.Request, req interface{}) error {
 
 	// --- (1) ----
 	// Try to decode the request body into the struct.
-	var req api.CreateUserReq
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		return nil, fmt.Errorf("unable to unmarshal request body: %w", err)
+		return fmt.Errorf("unable to unmarshal request body: %w", err)
 	}
 
 	// --- (2) ----
@@ -35,8 +32,8 @@ func (v *Validator) ValidateRequest(ctx context.Context, r *http.Request) (*api.
 	err = v.validate.StructCtx(ctx, req)
 	if err != nil {
 		validationErrors := err.(validator.ValidationErrors)
-		return nil, validationErrors
+		return validationErrors
 	}
 
-	return &req, nil
+	return nil
 }
