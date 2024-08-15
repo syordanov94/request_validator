@@ -1,6 +1,6 @@
-# Open API Request Validation Comparison
+# Open API Request Validator Comparer
 
-This project aims to present 2 different implementations of a validator that can assure us if a user request that a service receives follows the service's **Openapi** defined specification. 
+This project aims to present 2 different implementations of a validator (written in **Go**) that can assure us if a user request that a service receives follows the service's **Openapi** defined specification. 
 
 The first implementation will be a direct validator that uses the OpenAPI schema specs (**yaml** file) and checks if the http request complies with the schema. This validator checks:
 - Origin Server
@@ -10,7 +10,7 @@ The first implementation will be a direct validator that uses the OpenAPI schema
 For more information regarding this validator, you can check the specific pkg page [here](https://github.com/getkin/kin-openapi?tab=readme-ov-file#validating-http-requestsresponses)
 
 
-The other implementation uses the **Go-Playground** validator that compares the unmarshalled request body against the Go structures generated from the OpenAPI specs. This  implementation DOES NOT validate the origin server neither does it validate the path params, it ONLY validates the request body. 
+The other implementation uses the **Go-Playground** validator that compares the unmarshalled request body against the Go structures generated from the OpenAPI specs. This implementation **DOES NOT** validate the origin server **NOR** does it validate the path params, it **ONLY** validates the request body. 
 
 For more information on this validator you can check the specific pkg page [here](https://github.com/go-playground/validator). Also, you can check how you can generate the validation rules from the **OpenAPI** spec [here](https://github.com/oapi-codegen/oapi-codegen/blob/main/examples/extensions/xoapicodegenextratags/api.yaml).
 
@@ -21,7 +21,7 @@ For more information on this validator you can check the specific pkg page [here
 
 ## How to install and Run the project
 
-This project does not have **main.go** because its objective is to compare both request validator implementations. We have added a benchmarks to be able to accomplish this goal. The benchmarks are the same for both implementations in order to be able to give the "fairest" comparison. 
+This project does not have **main.go**. It contains both implementations of the request validator and tests that assure it's correct functionality. Since its objective is to compare both request validator implementations, we have added a benchmarks to be able to accomplish this goal. The benchmarks are the same for both implementations in order to be able to give the "fairest" comparison. 
 
 - First you will have to clone the project from this github repository:
 
