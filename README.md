@@ -45,9 +45,9 @@ git clone https://github.com/syordanov94/request_validator.git
 
 - Run all the benchmarks for each one of the implementations with the following command (which will iterate over the benchmarks 1000 times)
 
-        ```bash
-        go test -bench ./... -benchmem -benchtime=1000x
-        ```
+    ```bash
+    go test -bench ./... -benchmem -benchtime=1000x
+    ```
 
 ## How to perform changes to schema yaml spec
 
@@ -58,9 +58,9 @@ The **Go-Playground Validator** requires us to generate the resulting Go files f
 
 To generate the Go code, once in the specific folder, we can run the following command:
 
-    ```bash
-    go generate ./...
-    ```
+```bash
+go generate ./...
+```
 
 
 ### Possible error during go generate for open-api
