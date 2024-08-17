@@ -52,8 +52,6 @@ func (v *Validator) ValidateRequest(ctx context.Context, httpReq *http.Request) 
 		Request:    httpReq,
 		PathParams: pathParams,
 		Route:      route,
-		// This set up ignores authentication validation. We do this because our main objective here is to only validate the request body. Security validation is already
-		// performed by each service in it's middleware.
 		Options: &openapi3filter.Options{
 			AuthenticationFunc: openapi3filter.NoopAuthenticationFunc,
 		},
