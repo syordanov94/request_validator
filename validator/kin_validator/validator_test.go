@@ -1,4 +1,4 @@
-package openapivalidator
+package kinvalidator
 
 import (
 	"bytes"

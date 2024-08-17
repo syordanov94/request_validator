@@ -3,7 +3,6 @@ package: http_v1
 generate:
     models: true
     embedded-spec: true
-    client: true
 output-options:
     skip-prune: true
 compatibility:
