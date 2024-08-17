@@ -15,7 +15,6 @@ var (
 	emailRegex = `^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`
 )
 
-// The Open API Validator will contain a router which is used to recover the route and path params that the http request relates to
 type Validator struct {
 	router routers.Router
 }
