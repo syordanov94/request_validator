@@ -41,17 +41,17 @@ func MustCreateValidator(ctx context.Context, doc *openapi3.T) *Validator {
 	}
 }
 
-func (v *Validator) ValidateRequest(ctx context.Context, httpReq *http.Request) error {
+func (v *Validator) ValidateRequest(ctx context.Context, httpRq *http.Request) error {
 
-	route, pathParams, err := v.router.FindRoute(httpReq)
+	r, params, err := v.router.FindRoute(httpRq)
 	if err != nil {
-		return fmt.Errorf("error recovering request route: %w", err)
+		return fmt.Errorf("error finding request route: %w", err)
 	}
 
 	requestValidationInput := &openapi3filter.RequestValidationInput{
-		Request:    httpReq,
-		PathParams: pathParams,
-		Route:      route,
+		Request:    httpRq,
+		PathParams: params,
+		Route:      r,
 		Options: &openapi3filter.Options{
 			AuthenticationFunc: openapi3filter.NoopAuthenticationFunc,
 		},
