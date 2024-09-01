@@ -1,4 +1,4 @@
-output: http_api.gen.go
+output: api.gen.go
 package: http_v2
 generate:
     models: true
@@ -6,7 +6,3 @@ generate:
     client: true
 output-options:
     skip-prune: true
-compatibility:
-    always-prefix-enum-values: true
-    disable-flatten-additional-properties: true
-    old-aliasing: true
